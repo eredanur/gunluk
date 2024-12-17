@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Günlüklerim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .entry-content, .edit-container {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .entry-title {
+            cursor: pointer;
+            background-color: #f0f2f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.2rem;
+        }
+
+        .entry-title:hover {
+            background-color: #e2e6ea;
+        }
+
+        .no-title {
+            color: #6c757d;
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .delete-btn, .edit-btn {
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .delete-btn {
+            color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            color: #b02a37;
+        }
+
+        .edit-btn {
+            color: #0d6efd;
+        }
+
+        .edit-btn:hover {
+            color: #084298;
+        }
+    </style>
+</head>
+<body>
+        
+    <%- include('partials/header') %>
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Günlüklerim</h1>
+    <div id="successMessage" class="alert alert-success" style="display: none;"></div>
+    <!-- Günlük listesi -->
+    <% if (entries && entries.length > 0) { %>
+        <% entries.forEach(entry => { %>
+            <div class="mb-4" id="entry-<%= entry.id %>">
+                <div class="entry-title d-flex justify-content-between">
+                    
+                    <div class="entry-meta d-flex align-items-center" style="flex-grow: 1;">
+                        <% const date = new Date(entry.created_at); %>
+                        <%= date.toLocaleString('tr-TR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) %>
+                        <div class="action-btns d-flex align-items-center" style="margin-left: auto;">
+                            <span class="edit-btn" data-id="<%= entry.id %>">&#9998;</span>
+                            <span class="delete-btn" data-id="<%= entry.id %>">&#128465;</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="entry-content">
+                    <p><%= entry.content %></p>
+                </div>
+                <!-- Düzenleme alanı -->
+                <div class="edit-container">
+                    <textarea class="form-control" rows="3" id="edit-content-<%= entry.id %>"><%= entry.content %></textarea>
+                    <button class="btn btn-primary mt-2 save-btn" data-id="<%= entry.id %>">Kaydet</button>
+                    <button class="btn btn-secondary mt-2 cancel-btn" data-id="<%= entry.id %>">İptal</button>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p class="text-center">Henüz bir günlük kaydınız yok.</p>
+    <% } %>
+</div>
+
+<!-- Silme Onayı Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Silme Onayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bu günlük kaydını silmek istediğinize emin misiniz?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // İçerik aç/kapa işlemi
+        const entryTitles = document.querySelectorAll('.entry-title');
+        entryTitles.forEach(title => {
+            title.addEventListener('click', () => {
+                const content = title.closest('.mb-4').querySelector('.entry-content'); // İçeriği bul
+                if (content.style.display === 'block') {
+                    content.style.display = 'none';
+                } else {
+                    content.style.display = 'block';
+                }
+            });
+        });
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        let selectedEntryId = null;
+
+        // Silme düğmesine tıklama
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                selectedEntryId = button.getAttribute('data-id');
+                deleteModal.show();
+            });
+        });
+
+        // Silmeyi onaylama
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+            if (selectedEntryId) {
+                fetch(`/delete-entry/${selectedEntryId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // DOM'dan silinen öğeyi kaldır
+                        document.getElementById(`entry-${selectedEntryId}`).remove();
+                        // Başarı mesajını göster
+                        const successMessage = document.getElementById('successMessage');
+                        successMessage.innerText = 'Günlük başarıyla silindi.';
+                        successMessage.style.display = 'block';
+
+                        // 7 saniye sonra mesajı gizle
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 7000);  // 7 saniye = 7000 ms
+                    } else {
+                        alert('Günlük silinemedi. Lütfen tekrar deneyin.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+                })
+                .finally(() => {
+                    deleteModal.hide();
+                });
+            }
+        });
+
+        // Güncelleme işlemi
+        document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const entryId = button.getAttribute('data-id');
+        const contentDiv = document.getElementById(`entry-${entryId}`).querySelector('.entry-content');
+        const editContainer = document.getElementById(`entry-${entryId}`).querySelector('.edit-container');
+        const contentText = contentDiv.querySelector('p').innerText;
+
+        // Düzenleme alanını göster ve içeriği gizle
+        contentDiv.style.display = 'none';
+        editContainer.style.display = 'block';
+
+        // Kaydet ve iptal butonları için işlem yap
+        const saveButton = editContainer.querySelector('.save-btn');
+        const cancelButton = editContainer.querySelector('.cancel-btn');
+
+        // İptal butonuna tıklama
+        cancelButton.addEventListener('click', () => {
+            contentDiv.querySelector('p').innerText = contentText; // Eski içeriği geri getir
+            contentDiv.style.display = 'block'; // İçeriği göster
+            editContainer.style.display = 'none'; // Düzenleme formunu gizle
+        });
+
+        // Kaydetme işlemi
+        saveButton.addEventListener('click', () => {
+            const newContent = document.getElementById(`edit-content-${entryId}`).value;
+
+            if (!newContent.trim()) {  // İçeriğin boş olmaması gerektiğini kontrol et
+                alert('Günlük içeriği boş olamaz.');
+                return;  // İçerik boşsa işlem yapma
+            }
+
+            fetch(`/update-entry/${entryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content: newContent })
+            })
+            .then(response => {
+                if (response.ok) {
+                    const contentDiv = document.getElementById(`entry-${entryId}`).querySelector('.entry-content');
+                    const editContainer = document.getElementById(`entry-${entryId}`).querySelector('.edit-container');
+
+                    contentDiv.querySelector('p').innerText = newContent; // Yeni içeriği göster
+                    contentDiv.style.display = 'block'; // İçeriği göster
+                    editContainer.style.display = 'none'; // Düzenleme formunu gizle
+
+                   // Başarı mesajını göster
+                   const successMessage = document.getElementById('successMessage');
+                    successMessage.innerText = 'Günlük başarıyla güncellendi.';
+                    successMessage.style.display = 'block';
+
+                    // 7 saniye sonra mesajı gizle
+                    setTimeout(() => {
+                            successMessage.style.display = 'none';
+                    }, 7000);  // 7 saniye = 7000 ms
+                } else {
+                            alert('Günlük güncellenemedi. Lütfen tekrar deneyin.');
+                }
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            });
+        });
+    });
+});
+
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+/* Genel stil ayarları */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Sayfa başlıkları */
+h1 {
+    text-align: center;
+    color: #333;
+    margin-top: 50px;
+}
+
+/* Form alanları */
+form {
+    width: 700px;
+    height: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Input alanları */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #33205e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button[type="submit"]:hover {
+    background-color: #33205e;
+}
+
+/* Bağlantılar */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+p {
+    text-align: center;
+}
+.btn-link {
+    padding: 0; /* İkon butonunun etrafındaki boşlukları sıfırlıyoruz */
+}
+.btn-outline-secondary {
+    background: none;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.btn-outline-secondary:hover {
+    color: #dc3545; /* Hover olduğunda kırmızı renge geçsin */
+}
+.bi-person-circle {
+    transition: color 0.3s ease;
+    margin-right: 5px; /* İkon ve metin arasındaki boşluk */
+}
+.dropdown-menu {
+    z-index: 100 !important;
+    display:none;
+    min-width: 160px; /* Menü genişliğini küçültüyoruz */
+    padding: 0; /* Menü içindeki paddingi sıfırlıyoruz */
+    margin-top: 5px; /* Menü ile buton arasındaki boşluğu ayarlıyoruz */
+}
+.dropdown-menu.show {
+    display:block;
+    background-color: white;
+}
+.dropdown-item { 
+    padding: 10px 20px; /* Gerekirse butonun iç paddingini ayarlayın */
+}
+/* Sağ üst köşedeki ikon */
+.position-fixed {
+    z-index: 1050;
+}
+/* Günlük yazma textarea boyutunu büyütmek için */
+textarea {
+    width: 500%;
+    height: 400px;  /* Boyutu artırdık */
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;  /* Yazı tipi boyutunu da büyütebilirsiniz */
+}
+.btn-delete {
+    font-size: 0.8rem; /* Daha küçük yazı boyutu */
+    padding: 5px 10px; /* Butonun içindeki boşlukları küçültme */
+}

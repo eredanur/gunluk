@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayarlar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .settings-container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+
+        .sidebar {
+            flex: 1;
+            max-width: 300px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .main-content {
+            flex: 3;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+<div class="container mt-4">
+    <div class="settings-container">
+        <!-- Sol Sidebar -->
+        <div class="sidebar">
+            <h5>Ayarlar</h5>
+            <ul class="list-group">
+                <li class="list-group-item" style="cursor: pointer;" onclick="showForm('usernameForm')">Kullanıcı Adı Değiştir</li>
+                <li class="list-group-item" style="cursor: pointer;" onclick="showForm('passwordForm')">Şifre Değiştir</li>
+                <li class="list-group-item" style="cursor: pointer;" onclick="showForm('deleteAccountForm')">Hesabını Kalıcı Sil</li>
+            </ul>
+        </div>
+
+        <!-- Sağ Ana İçerik -->
+        <div class="main-content">
+            <!-- Kullanıcı Adı Değiştir Formu -->
+            <div id="usernameForm" class="form-container" style="display: none;">
+                <h3>Kullanıcı Adı Değiştir</h3>
+                <div class="mb-3">
+                    <label for="newUsername" class="form-label">Yeni Kullanıcı Adı</label>
+                    <input type="text" id="newUsername" class="form-control" placeholder="Yeni kullanıcı adınızı girin">
+                    <div id="usernameFeedback" class="form-text"></div>
+                </div>
+                <button id="updateUsername" class="btn btn-primary w-100" disabled>Güncelle</button>
+            </div>
+
+            <!-- Şifre Değiştir Formu -->
+            <div id="passwordForm" class="form-container" style="display: none;">
+                <h3>Şifre Değiştir</h3>
+                <div class="mb-3">
+                    <label for="oldPassword" class="form-label">Eski Şifre</label>
+                    <input type="password" id="oldPassword" class="form-control" placeholder="Eski şifrenizi girin">
+                </div>
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label">Yeni Şifre</label>
+                    <input type="password" id="newPassword" class="form-control" placeholder="Yeni şifrenizi girin">
+                </div>
+                <div class="mb-3">
+                    <label for="confirmNewPassword" class="form-label">Yeni Şifreyi Onayla</label>
+                    <input type="password" id="confirmNewPassword" class="form-control" placeholder="Yeni şifreyi tekrar girin">
+                </div>
+                <button id="updatePassword" class="btn btn-primary w-100">Güncelle</button>
+            </div>
+            <!-- Hesabı Kalıcı Silme Formu -->
+            <div id="deleteAccountForm" class="form-container" style="display: none;">
+                <h3>Hesabını Kalıcı Sil</h3>
+                <button id="deleteAccount" class="btn btn-danger w-100">Hesabımı Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedbackModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="feedbackModalMessage"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Hesabı Silme Onay Modali -->
+<div class="modal fade" id="deleteAccountConfirmModal" tabindex="-1" aria-labelledby="deleteAccountConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountConfirmModalLabel">Hesabı Kalıcı Olarak Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <p>Hesabınızı kalıcı olarak silmek üzeresiniz. Bu işlem geri alınamaz. Devam etmek istediğinize emin misiniz?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" id="confirmDeleteAccount" class="btn btn-danger">Tamam</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Şifre Doğrulama Modali -->
+<div class="modal fade" id="passwordVerifyModal" tabindex="-1" aria-labelledby="passwordVerifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordVerifyModalLabel">Şifre Doğrulama</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="deletePassword" class="form-label">Şifrenizi Girin</label>
+                    <input type="password" id="deletePassword" class="form-control" placeholder="Şifrenizi girin" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" id="verifyPassword" class="btn btn-danger">Hesabı Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script>
+    // Kullanıcı adı kontrolü
+    document.getElementById('newUsername').addEventListener('input', async function () {
+        const username = this.value.trim();
+        const feedback = document.getElementById('usernameFeedback');
+        const updateButton = document.getElementById('updateUsername');
+
+        if (username === '') {
+            feedback.textContent = 'Kullanıcı adı boş olamaz.';
+            feedback.style.color = 'red';
+            updateButton.disabled = true;
+            return;
+        }
+
+        try {
+            const response = await fetch(`/check-username?username=${encodeURIComponent(username)}`);
+            const data = await response.json();
+
+            if (data.available) {
+                feedback.textContent = data.message;
+                feedback.style.color = 'green';
+                updateButton.disabled = false;
+            } else {
+                feedback.textContent = data.message;
+                feedback.style.color = 'red';
+                updateButton.disabled = true;
+            }
+        } catch (error) {
+            console.error('Kullanıcı adı kontrol hatası:', error);
+            feedback.textContent = 'Sunucu hatası. Lütfen tekrar deneyin.';
+            feedback.style.color = 'red';
+            updateButton.disabled = true;
+        }
+    });
+
+    // Güncelle butonuna tıklama işlemi
+    document.getElementById('updateUsername').addEventListener('click', async function () {
+        const newUsername = document.getElementById('newUsername').value.trim();
+        const feedback = document.getElementById('usernameFeedback');
+
+        if (!newUsername) {
+            feedback.textContent = 'Kullanıcı adı boş olamaz.';
+            feedback.style.color = 'red';
+            return;
+        }
+
+        try {
+            const response = await fetch('/update-username', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ newUsername }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Başarılı işlem sonrası modal göster
+                showModal('Başarı', 'Kullanıcı adı başarıyla değiştirildi.');
+                document.getElementById('newUsername').value = '';
+            } else {
+                // Hata durumunda modal göster
+                showModal('Hata', data.message);
+            }
+        } catch (error) {
+            console.error('Güncelleme hatası:', error);
+            showModal('Hata', 'Sunucu hatası. Lütfen tekrar deneyin.');
+        }
+    });
+
+    // Şifre güncelleme işlemi
+    document.getElementById('updatePassword').addEventListener('click', async function () {
+        const oldPassword = document.getElementById('oldPassword').value.trim();
+        const newPassword = document.getElementById('newPassword').value.trim();
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value.trim();
+
+        // Alanların boş olup olmadığını kontrol et
+        if (!oldPassword || !newPassword || !confirmNewPassword) {
+            showModal('Hata', 'Tüm alanları doldurduğunuzdan emin olun.');
+            return;
+        }
+
+        // Yeni şifrelerin eşleşip eşleşmediğini kontrol et
+        if (newPassword !== confirmNewPassword) {
+            showModal('Hata', 'Yeni şifreler uyuşmuyor.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/update-password', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ oldPassword, newPassword }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Başarılı işlem sonrası modal göster
+                showModal('Başarı', 'Şifre başarıyla değiştirildi.');
+                // Şifre alanlarını temizle
+                document.getElementById('oldPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+            } else {
+                // Hata durumunda modal göster
+                showModal('Hata', data.message);
+            }
+        } catch (error) {
+            console.error('Güncelleme hatası:', error);
+            showModal('Hata', 'Sunucu hatası. Lütfen tekrar deneyin.');
+        }
+    });
+
+    // Hesabı Sil butonuna tıklandığında doğrulama modalı göster
+document.getElementById('deleteAccount').addEventListener('click', function () {
+    const deleteAccountConfirmModal = new bootstrap.Modal(document.getElementById('deleteAccountConfirmModal'));
+    deleteAccountConfirmModal.show();
+});
+
+// Doğrulama modalında "Tamam" butonuna tıklandığında şifre doğrulama modalı göster
+document.getElementById('confirmDeleteAccount').addEventListener('click', function () {
+    const deleteAccountConfirmModal = bootstrap.Modal.getInstance(document.getElementById('deleteAccountConfirmModal'));
+    deleteAccountConfirmModal.hide(); // İlk modalı kapat
+    const passwordVerifyModal = new bootstrap.Modal(document.getElementById('passwordVerifyModal'));
+    passwordVerifyModal.show(); // Şifre doğrulama modalını aç
+});
+
+// Şifre doğrulama ve hesap silme işlemi
+document.getElementById('verifyPassword').addEventListener('click', async function () {
+    const password = document.getElementById('deletePassword').value.trim();
+
+    if (!password) {
+        alert('Lütfen şifrenizi girin.');
+        return;
+    }
+
+    // Oturumdaki kullanıcı ID'sini alıyoruz
+    let userId;
+    try {
+        const response = await fetch('/getUserId');  // Kullanıcı ID'sini almak için API çağrısı
+        const data = await response.json();
+
+        if (response.ok && data.userId) {
+            userId = data.userId;
+        } else {
+            alert('Kullanıcı ID bulunamadı, lütfen giriş yapın.');
+            return;
+        }
+    } catch (error) {
+        console.error('Kullanıcı ID alma hatası:', error);
+        alert('Kullanıcı ID alınırken bir hata oluştu.');
+        return;
+    }
+
+    console.log('Kullanıcı ID:', userId);  // Konsolda kontrol
+    console.log('Girilen Şifre:', password);
+
+    try {
+        const deleteResponse = await fetch('/delete-account', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, password }),
+        });
+
+        const data = await deleteResponse.json();
+
+        if (deleteResponse.ok) {
+            alert(data.message || 'Hesabınız başarıyla silindi.');
+            window.location.href = '/signup';  // Kullanıcıyı giriş sayfasına yönlendir
+        } else {
+            alert(data.message || 'Hesap silme işlemi başarısız.');
+        }
+    } catch (error) {
+        console.error('Hesap silme hatası:', error);
+        alert('Sunucu hatası. Lütfen tekrar deneyin.');
+    }
+});
+    
+
+    // Modal gösterme fonksiyonu
+    function showModal(title, message) {
+        const modalTitle = document.getElementById('feedbackModalLabel');
+        const modalMessage = document.getElementById('feedbackModalMessage');
+
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+
+        const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+        feedbackModal.show();
+    }
+
+    // Form gösterme fonksiyonu
+    function showForm(formId) {
+        // Tüm formları gizle
+        document.getElementById('usernameForm').style.display = 'none';
+        document.getElementById('passwordForm').style.display = 'none';
+
+        // İlgili formu göster
+        document.getElementById(formId).style.display = 'block';
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

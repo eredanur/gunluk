@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Günlük Sayfası</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ2QX7fFBCa6gR5dxh0Wz2xxfLvY2m0rXr1p5D8A1HkBBjswVxVNkW3OgFSk" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f4f7fa;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+        .entry {
+            border-bottom: 1px solid #ddd;
+            padding: 15px;
+        }
+        .entry p {
+            margin: 10px 0;
+        }
+        .entry strong {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+<div class="container mt-4">
+    <!-- Ana içerik buraya gelir -->
+
+    <div class="container">
+        <h1 class="text-center mb-4">Günlük Defteri</h1>
+
+        <!-- Başarı mesajını burada gösteriyoruz -->
+        <% if (typeof successMessage !== 'undefined') { %>
+            <div id="successMessage" class="alert alert-success">
+                <%= successMessage %>
+            </div>
+        <% } %>
+
+        <!-- Hata mesajını burada gösteriyoruz -->
+        <% if (typeof errorMessage !== 'undefined') { %>
+            <div id="errorMessage" class="alert alert-danger">
+                <%= errorMessage %>
+            </div>
+        <% } %>
+
+        <!-- Yeni Günlük Eklemek İçin Form -->
+        <form action="/add-entry" method="POST" class="mb-4">
+            <div class="mb-3">
+                <textarea name="content" class="form-control" rows="5" placeholder="Günlüğünüzü buraya yazın..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Kaydet</button>
+        </form>
+        
+        
+    </div>
+
+    <!-- Bootstrap JS, Popper.js ve jQuery (isteğe bağlı) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybB1p20Qdq4tU7xpmvnXy8c3R74dgs9MvmxO71Ft4VgO1hX2C" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0AM4j+EdYnvpe1IGW9BzB5drDxhf5mcfvYbZ2kKksFqC9Vld" crossorigin="anonymous"></script>
+
+    <script>
+        // Sayfa yüklendikten sonra başarı mesajının kaybolmasını sağlamak için
+        window.onload = function() {
+            // Success Message
+            const successMessage = document.getElementById('successMessage');
+            if (successMessage) {
+                setTimeout(function() {
+                    successMessage.style.display = 'none'; // 10 saniye sonra başarı mesajını gizle
+                }, 7000); // 10 saniye = 10000 ms
+            }
+    
+            // Error Message
+            const errorMessage = document.getElementById('errorMessage');
+            if (errorMessage) {
+                setTimeout(function() {
+                    errorMessage.style.display = 'none'; // 10 saniye sonra hata mesajını gizle
+                }, 7000); // 10 saniye = 10000 ms
+            }
+        };
+    </script>
+</div>
+</body>
+</html>
+
