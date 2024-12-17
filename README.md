@@ -24,5 +24,5 @@ Bu uygulamayı çalıştırmak için aşağıdaki yazılımların yüklü olmas�
 ### 1. Depoyu Klonlama
 Bu projeyi klonlamak için şu komutu çalıştırın:
 ```bash
-git clone https://github.com/KullaniciAdiniz/gunluk.git
+git clone https://github.com/eredanur/gunluk.git
 cd gunluk
